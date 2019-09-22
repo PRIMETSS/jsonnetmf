@@ -3,141 +3,171 @@
 // terms of a written license.
 using System;
 using System.Collections;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 
 namespace PervasiveDigital.Json
 {
-	public class JObject : JToken
-	{
-		private readonly Hashtable _members = new Hashtable();
+    public class JObject : JToken
+    {
+        private readonly Hashtable _members = new Hashtable();
 
-		public JProperty this[string name]
-		{
-			get { return (JProperty)_members[name.ToLower()]; }
-			set
-			{
-				if (name.ToLower() != value.Name.ToLower())
-					throw new ArgumentException("index value must match property name");
-				_members.Add(value.Name.ToLower(), value);
-			}
-		}
+        public JProperty this[string name]
+        {
+            get { return (JProperty)_members[name.ToLower()]; }
+            set
+            {
+                if (name.ToLower() != value.Name.ToLower())
+                    throw new ArgumentException("index value must match property name");
+                _members.Add(value.Name.ToLower(), value);
+            }
+        }
 
-		public ICollection Members
-		{
-			get { return _members.Values; }
-		}
+        public ICollection Members
+        {
+            get { return _members.Values; }
+        }
 
-		public void Add(string name, JToken value)
-		{
-			_members.Add(name.ToLower(), new JProperty(name, value));
-		}
+        public void Add(string name, JToken value)
+        {
+            _members.Add(name.ToLower(), new JProperty(name, value));
+        }
 
-		public static JObject Serialize(Type type, object oSource)
-		{
-			var result = new JObject();
-			var methods = type.GetMethods();
-			foreach (var m in methods)
-			{
-				if (!m.IsPublic)
-					continue;
+        public static JObject Serialize(Type type, object oSource)
+        {
+            var result = new JObject();
+            var methods = type.GetMethods();
 
-				if (m.Name.IndexOf("get_") == 0)
-				{
-					var name = m.Name.Substring(4);
-					var methodResult = m.Invoke(oSource, null);
-					if (methodResult == null)
-						result._members.Add(name.ToLower(), new JProperty(name, JValue.Serialize(m.ReturnType, null)));
-					if (m.ReturnType.IsArray)
-						result._members.Add(name.ToLower(), new JProperty(name, JArray.Serialize(m.ReturnType, methodResult)));
-					else
-						result._members.Add(name.ToLower(), new JProperty(name, JObject.Serialize(m.ReturnType, methodResult)));
-				}
-			}
+#if DEBUG
+            Debug.WriteLine($"{Environment.NewLine} ");
+            foreach (var m in methods)
+                Debug.WriteLine($"Meths {m.Name} ");
+#endif
 
-			var fields = type.GetFields();
-			foreach (var f in fields)
-			{
-				if (f.FieldType.IsNotPublic)
-					continue;
+            foreach (var m in methods)
+            {
+                if (!m.IsPublic)
+                    continue;
 
-				switch (f.MemberType)
-				{
-					case MemberTypes.Field:
-					case MemberTypes.Property:
-						var value = f.GetValue(oSource);
-						if (value == null)
-						{
-							result._members.Add(f.Name, new JProperty(f.Name, JValue.Serialize(f.FieldType, null)));
-						}
-						else if (f.FieldType.IsValueType || f.FieldType == typeof(string))
-						{
-							result._members.Add(f.Name.ToLower(),
-								new JProperty(f.Name, JValue.Serialize(f.FieldType, value)));
-						}
-						else
-						{
-							if (f.FieldType.IsArray)
-							{
-								result._members.Add(f.Name.ToLower(),
-									new JProperty(f.Name, JArray.Serialize(f.FieldType, value)));
-							}
-							else
-							{
-								result._members.Add(f.Name.ToLower(),
-									new JProperty(f.Name, JObject.Serialize(f.FieldType, value)));
-							}
-						}
-						break;
-					default:
-						break;
-				}
-			}
+                // Changes new re-compile of library
+                if (m.Name.IndexOf("get_") == 0 & (m.Name != "get_Chars") & (m.Name != "get_Length" & (m.Name != "Empty"))) // ADDED AS TINY CLR May Have issue with getting Chars from String (see my post forum)
+                {
+                    var name = m.Name.Substring(4);
+                    var methodResult = m.Invoke(oSource, null);
+                    if (methodResult == null)
+                        result._members.Add(name, new JProperty(name, JValue.Serialize(m.ReturnType, null)));
+                    if (methodResult == null)
+                    {
+                        result._members.Add(name, new JProperty(name, JValue.Serialize(m.ReturnType, null)));
+                    }
+                    else if (m.ReturnType.IsValueType || m.ReturnType == typeof(string))
+                    {
+                        result._members.Add(name, new JProperty(name, JValue.Serialize(m.ReturnType, methodResult)));
+                    }
+                    else
+                    {
+                        if (m.DeclaringType.IsArray)
+                        {
+                            result._members.Add(name, new JProperty(name, JArray.Serialize(m.ReturnType, methodResult)));
+                        }
+                        else
+                        {
+                            result._members.Add(name, new JProperty(name, JObject.Serialize(m.ReturnType, methodResult)));
+                        }
+                    }
+                }
+            }
 
-			return result;
-		}
+            var fields = type.GetFields();
+#if DEBUG
+            Debug.WriteLine($"{Environment.NewLine} ");
+            foreach (var f in fields)
+                Debug.WriteLine($"Field {f.Name} ");
+#endif
 
-		public override string ToString()
-		{
-			EnterSerialization();
-			try
-			{
-				StringBuilder sb = new StringBuilder();
+            foreach (var f in fields)
+            {
+                if (f.FieldType.IsNotPublic)
+                    continue;
 
-				sb.AppendLine(Indent(true) + "{");
-				bool first = true;
-				foreach (var member in _members.Values)
-				{
-					if (!first)
-						sb.AppendLine(",");
-					first = false;
-					sb.Append(Indent() + ((JProperty)member).ToString());
-				}
-				sb.AppendLine();
-				Outdent();
-				sb.Append(Indent() + "}");
-				return sb.ToString();
-			}
-			finally
-			{
-				ExitSerialization();
-			}
-		}
+                switch (f.MemberType)
+                {
+                    case MemberTypes.Field:
+                    case MemberTypes.Property:
+                        var value = f.GetValue(oSource);
+                        if (value == null)
+                        {
+                            result._members.Add(f.Name, new JProperty(f.Name, JValue.Serialize(f.FieldType, null)));
+                        }
+                        else if (f.FieldType.IsValueType || f.FieldType == typeof(string))
+                        {
+                            result._members.Add(f.Name,
+                                new JProperty(f.Name, JValue.Serialize(f.FieldType, value)));
+                        }
+                        else
+                        {
+                            if (f.FieldType.IsArray)
+                            {
+                                result._members.Add(f.Name,
+                                    new JProperty(f.Name, JArray.Serialize(f.FieldType, value)));
+                            }
+                            else
+                            {
+                                result._members.Add(f.Name,
+                                    new JProperty(f.Name, JObject.Serialize(f.FieldType, value)));
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
 
-		public override int GetBsonSize()
-		{
+            return result;
+        }
+
+        public override string ToString()
+        {
+            EnterSerialization();
+            try
+            {
+                StringBuilder sb = new StringBuilder();
+
+                sb.AppendLine(Indent(true) + "{");
+                bool first = true;
+                foreach (var member in _members.Values)
+                {
+                    if (!first)
+                        sb.AppendLine(",");
+                    first = false;
+                    sb.Append(Indent() + ((JProperty)member).ToString());
+                }
+                sb.AppendLine();
+                Outdent();
+                sb.Append(Indent() + "}");
+                return sb.ToString();
+            }
+            finally
+            {
+                ExitSerialization();
+            }
+        }
+
+        public override int GetBsonSize()
+        {
             int offset = 0;
             this.ToBson(null, ref offset);
             return offset;
         }
 
         public override int GetBsonSize(string ename)
-		{
-			return 1 + ename.Length + 1 + this.GetBsonSize();
-		}
+        {
+            return 1 + ename.Length + 1 + this.GetBsonSize();
+        }
 
-		public override void ToBson(byte[] buffer, ref int offset)
-		{
+        public override void ToBson(byte[] buffer, ref int offset)
+        {
             int startingOffset = offset;
 
             // leave space for the size
@@ -149,14 +179,14 @@ namespace PervasiveDigital.Json
             }
 
             // Write the trailing nul
-            if (buffer!=null)
+            if (buffer != null)
                 buffer[offset] = (byte)0;
             ++offset;
 
             // Write the completed size
-            if (buffer!=null)
+            if (buffer != null)
                 SerializationUtilities.Marshall(buffer, ref startingOffset, offset - startingOffset);
-		}
+        }
 
         public override BsonTypes GetBsonType()
         {
