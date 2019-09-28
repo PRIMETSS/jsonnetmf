@@ -2,7 +2,6 @@
 // Use of this code and resulting binaries is permitted only under the
 // terms of a written license.
 using System;
-using Microsoft.SPOT;
 
 namespace PervasiveDigital.Json
 {

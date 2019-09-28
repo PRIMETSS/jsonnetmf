@@ -3,11 +3,11 @@
 // terms of a written license.
 using System;
 using System.Collections;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using Microsoft.SPOT;
 
 namespace PervasiveDigital.Json
 {
@@ -389,9 +389,9 @@ namespace PervasiveDigital.Json
 		{
 			// a diagnostic wrapper, used only in debug builds
 			var result = GetNextTokenInternal(sourceReader);
-			Debug.Print(result.TType.TokenTypeToString());
+			Debug.WriteLine(result.TType.TokenTypeToString());
 			if (result.TType == TokenType.String || result.TType == TokenType.Number)
-				Debug.Print("    " + result.TValue);
+				Debug.WriteLine("    " + result.TValue);
 			return result;
 		}
 
