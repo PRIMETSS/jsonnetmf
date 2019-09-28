@@ -3,10 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29306.81
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "JsonNetmf.Shared", "JsonNetmf.Shared\JsonNetmf.Shared.shproj", "{FD701612-D4CC-41B5-A66E-87B50EB1ABBF}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsonNetmf.test", "JsonNetmf.test\JsonNetmf.test.csproj", "{9EEEEC67-FA89-41A3-9240-918829D8E2EE}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsonNetTinyCLR.Shared", "JsonNetTinyCLR.Shared\JsonNetTinyCLR.Shared.csproj", "{BE48356A-AEDF-49C2-A90B-E36A391F8FE0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsonNetTinyCLR.text", "JsonNetTinyCLR.text\JsonNetTinyCLR.text.csproj", "{1BF3D085-0F43-475D-B1BC-D43475BEA507}"
@@ -17,12 +13,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9EEEEC67-FA89-41A3-9240-918829D8E2EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9EEEEC67-FA89-41A3-9240-918829D8E2EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9EEEEC67-FA89-41A3-9240-918829D8E2EE}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{9EEEEC67-FA89-41A3-9240-918829D8E2EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9EEEEC67-FA89-41A3-9240-918829D8E2EE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9EEEEC67-FA89-41A3-9240-918829D8E2EE}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{BE48356A-AEDF-49C2-A90B-E36A391F8FE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BE48356A-AEDF-49C2-A90B-E36A391F8FE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE48356A-AEDF-49C2-A90B-E36A391F8FE0}.Release|Any CPU.ActiveCfg = Release|Any CPU

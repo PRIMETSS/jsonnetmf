@@ -73,7 +73,7 @@ namespace JsonNetTinyCLR.text
                 aString = "A string",
                 i = 10,
                 someName = "who?",
-                Timestamp = DateTime.UtcNow,
+                Timestamp = new DateTime(2008,1,1),
                 intArray = new[] { 1, 3, 5, 7, 9 },
                 stringArray = new[] { "two", "four", "six", "eight" },
                 child1 = new ChildClass() { one = 1, two = 2, three = 3 },

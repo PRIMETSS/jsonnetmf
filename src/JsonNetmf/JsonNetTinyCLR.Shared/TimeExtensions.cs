@@ -129,7 +129,7 @@ namespace PervasiveDigital.Json
 			if (utc)
 			{
 				// Convert the Kind to DateTimeKind.Utc if string Z present
-				dt = new DateTime(0, DateTimeKind.Utc).AddTicks(dt.Ticks);
+				dt = new DateTime(dt.Ticks, DateTimeKind.Utc);
 			}
 
 			return dt;
