@@ -42,17 +42,27 @@ namespace PervasiveDigital.Json
 				if (!m.IsPublic)
 					continue;
 
-				if (m.Name.IndexOf("get_") == 0)
-				{
-					var name = m.Name.Substring(4);
-					var methodResult = m.Invoke(oSource, null);
-					if (methodResult == null)
-						result._members.Add(name.ToLower(), new JProperty(name, JValue.Serialize(m.ReturnType, null)));
-					if (m.ReturnType.IsArray)
-						result._members.Add(name.ToLower(), new JProperty(name, JArray.Serialize(m.ReturnType, methodResult)));
-					else
-						result._members.Add(name.ToLower(), new JProperty(name, JObject.Serialize(m.ReturnType, methodResult)));
-				}
+                // Modified AS TINY CLR May Have issue with Getter for Chars & Length from String (see post forum)
+                if (m.Name.IndexOf("get_") == 0 & (m.Name != "get_Chars") & (m.Name != "get_Length" & (m.Name != "Empty")))
+                {
+                    var name = m.Name.Substring(4);
+                    var methodResult = m.Invoke(oSource, null);
+                    if (methodResult == null)
+                        result._members.Add(name, new JProperty(name, JValue.Serialize(m.ReturnType, null)));
+                    else if (m.ReturnType.IsValueType || m.ReturnType == typeof(string))
+                        result._members.Add(name, new JProperty(name, JValue.Serialize(m.ReturnType, methodResult)));
+                    else
+                    {
+                        if (m.DeclaringType.IsArray)
+                        {
+                            result._members.Add(name, new JProperty(name, JArray.Serialize(m.ReturnType, methodResult)));
+                        }
+                        else
+                        {
+                            result._members.Add(name, new JProperty(name, JObject.Serialize(m.ReturnType, methodResult)));
+                        }
+                    }
+                }
 			}
 
 			var fields = type.GetFields();
